@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--========== BOX ICONS ==========-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+
+    <!--========== CSS ==========-->
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/product.css">
+
+    <title>Batch Receipts - StockApp</title>
+
+    <style>
+        .receipt-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+        }
+        .receipt-form {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .receipt-form label {
+            font-size: var(--normal-font-size);
+            font-weight: var(--font-medium);
+            color: var(--text-color);
+        }
+        .receipt-form select,
+        .receipt-form button {
+            padding: 0.75rem;
+            border-radius: 0.25rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            font-size: var(--normal-font-size);
+            font-family: var(--body-font);
+            background-color: var(--container-color);
+        }
+        .receipt-form button {
+            background-color: var(--first-color);
+            color: var(--container-color);
+            border: none;
+            cursor: pointer;
+            font-weight: var(--font-medium);
+            transition: background-color 0.3s;
+            display: inline-block;
+            width: auto;
+            max-width: 200px;
+        }
+        .receipt-form button:hover {
+            background-color: var(--first-color-light);
+            color: var(--title-color);
+        }
+        .receipt-content {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        .receipt-content table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .receipt-content th,
+        .receipt-content td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .receipt-content th {
+            background-color: #6923d0;
+            color: white;
+        }
+        .print-button {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--first-color);
+            color: var(--container-color);
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .print-button:hover {
+            background-color: var(--first-color-light);
+            color: var(--title-color);
+        }
+        @media (max-width: 768px) {
+            .receipt-form {
+                grid-template-columns: 1fr;
+            }
+            .receipt-content table {
+                font-size: var(--small-font-size);
+            }
+        }
+    </style>
+</head>
+<body>
+<!--========== HEADER ==========-->
+<header class="header">
+    <div class="header__container">
+        <img src="/images/profile-img.png" alt="Profile" class="header__img">
+        <a href="/index" class="header__logo">StockApp</a>
+        <div class="header__search">
+            <input type="search" placeholder="Search" class="header__input">
+            <i class='bx bx-search header__icon'></i>
+        </div>
+        <div class="header__toggle">
+            <i class='bx bx-menu' id="header-toggle"></i>
+        </div>
+    </div>
+</header>
+
+<!--========== NAV ==========-->
+<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+<!--========== MAIN CONTENT ==========-->
+<main>
+    <section class="receipt-container">
+        <h2>Batch Receipts</h2>
+
+        <!-- Error Message -->
+        <div th:if="${errorMessage}" style="color: red; margin-bottom: 1rem;">
+            <p th:text="${errorMessage}"></p>
+        </div>
+
+        <!-- Receipt Form -->
+        <form th:action="@{/reports/batch-receipts}" method="post" class="receipt-form">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+            <div>
+                <label for="reportType">Report Type</label>
+                <select id="reportType" name="reportType" required>
+                    <option value="" disabled selected>Select report type</option>
+                    <option value="allProducts">All Products</option>
+                    <option value="byCategory">By Category</option>
+                    <option value="bySupplier">By Supplier</option>
+                    <option value="allWithdrawals">All Withdrawals</option>
+                    <option value="allEntries">All Entries</option>
+                </select>
+            </div>
+            <div id="categoryDiv" style="display: none;">
+                <label for="categoryId">Category</label>
+                <select id="categoryId" name="categoryId">
+                    <option value="" disabled selected>Select category</option>
+                    <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+                </select>
+            </div>
+            <div id="supplierDiv" style="display: none;">
+                <label for="supplierId">Supplier</label>
+                <select id="supplierId" name="supplierId">
+                    <option value="" disabled selected>Select supplier</option>
+                    <option th:each="supplier : ${suppliers}" th:value="${supplier.id}" th:text="${supplier.name}"></option>
+                </select>
+            </div>
+            <button type="submit">Generate Receipt</button>
+        </form>
+
+        <!-- Receipt Content -->
+        <div id="receiptContent" class="receipt-content">
+            <h3 id="receiptTitle">Receipt</h3>
+            <table id="receiptTable">
+                <thead>
+                <tr id="receiptHeaders"></tr>
+                </thead>
+                <tbody id="receiptBody"></tbody>
+            </table>
+            <button class="print-button" onclick="printReceipt()">Print Receipt</button>
+        </div>
+    </section>
+</main>
+
+<!--========== FOOTER ==========-->
+<footer class="footer">
+    <p>© 2025 StockApp. All rights reserved.</p>
+</footer>
+
+<!--========== MAIN JS ==========-->
+<script src="/js/main.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('.receipt-form');
+        const receiptContent = document.getElementById('receiptContent');
+        const reportTypeSelect = document.getElementById('reportType');
+        const categoryDiv = document.getElementById('categoryDiv');
+        const supplierDiv = document.getElementById('supplierDiv');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const reportType = reportTypeSelect.value;
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData).toString();
+
+            if (reportType) {
+                console.log('Submitting form with params:', params);
+                fetch(`/reports/batch-receipts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    body: params
+                })
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok: ' + response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Received data:', data);
+                        if (data.error) {
+                            alert('Error: ' + data.error);
+                        } else {
+                            receiptContent.style.display = 'block';
+                            document.getElementById('receiptTitle').textContent = data.title || 'Receipt';
+                            const headers = data.headers || [];
+                            const dataRows = data.data || [];
+
+                            const thead = document.getElementById('receiptHeaders');
+                            thead.innerHTML = headers.map(h => `<th>${h}</th>`).join('');
+
+                            const tbody = document.getElementById('receiptBody');
+                            if (dataRows.length === 0) {
+                                tbody.innerHTML = '<tr><td colspan="' + headers.length + '">No data available</td></tr>';
+                            } else {
+                                tbody.innerHTML = dataRows.map(row => `
+                                <tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>
+                            `).join('');
+                            }
+
+                            // Store the data in a global variable for printing
+                            window.receiptData = {
+                                title: data.title,
+                                headers: data.headers,
+                                data: data.data
+                            };
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching receipt:', error);
+                        alert('Failed to generate receipt: ' + error.message);
+                    });
+            } else {
+                alert('Please select a report type.');
+            }
+        });
+
+        reportTypeSelect.addEventListener('change', function() {
+            categoryDiv.style.display = this.value === 'byCategory' ? 'block' : 'none';
+            supplierDiv.style.display = this.value === 'bySupplier' ? 'block' : 'none';
+        });
+
+        // Function to trigger PDF generation
+        window.printReceipt = function() {
+            if (!window.receiptData) {
+                alert('No receipt data available to print.');
+                return;
+            }
+            const { title, headers, data } = window.receiptData;
+            const reportType = document.getElementById('reportType').value;
+            let categoryId = document.getElementById('categoryId') ? document.getElementById('categoryId').value : null;
+            let supplierId = document.getElementById('supplierId') ? document.getElementById('supplierId').value : null;
+
+            let url = `/reports/batch-receipts/print?reportType=${reportType}`;
+            if (reportType === 'byCategory' && categoryId) {
+                url += `&categoryId=${categoryId}`;
+            } else if (reportType === 'bySupplier' && supplierId) {
+                url += `&supplierId=${supplierId}`;
+            }
+
+            console.log('Printing receipt with URL:', url);
+            window.location.href = url;
+        };
+    });
+</script>
+</body>
+</html>

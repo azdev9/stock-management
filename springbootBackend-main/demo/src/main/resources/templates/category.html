@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--========== BOX ICONS ==========-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+
+    <!--========== CSS ==========-->
+    <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/style.css">
+
+    <title>Categories - StockApp</title>
+
+    <style>
+        /* Add styling for the header section with flexbox */
+        .category-management-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .category-management-header h2 {
+            margin: 0;
+        }
+
+        .category-management-header a.modal__button {
+            text-decoration: none;
+        }
+
+        /* Center the modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal__content {
+            max-width: 500px;
+            width: 90%;
+            margin: auto;
+        }
+
+        /* Adjust table layout */
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .product-table th, .product-table td {
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        /* Make the Category Name column take most of the width */
+        .product-table th:first-child,
+        .product-table td:first-child {
+            width: 70%;
+        }
+
+        /* Align actions to the right */
+        .product-table th:last-child,
+        .product-table td:last-child {
+            width: 30%;
+            text-align: right;
+        }
+
+        /* Ensure buttons are aligned within the cell */
+        .product-table td:last-child > * {
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+<!--========== HEADER ==========-->
+<header class="header">
+    <div class="header__container">
+        <img src="/images/profile-img.png" alt="Profile" class="header__img">
+
+        <a href="#" class="header__logo">StockApp</a>
+
+        <div class="header__search">
+            <input type="search" placeholder="Search by Category Name" class="header__input" id="searchInput">
+            <i class='bx bx-search header__icon'></i>
+        </div>
+
+        <div class="header__toggle">
+            <i class='bx bx-menu' id="header-toggle"></i>
+        </div>
+    </div>
+</header>
+
+<!--========== NAV ==========-->
+<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+<!--========== CONTENTS ==========-->
+<main>
+    <!-- Category Management Container -->
+    <section class="category-management">
+        <div class="category-management-header">
+            <h2>Category List</h2>
+            <button class="modal__button" onclick="openAddModal()">Add Category</button>
+        </div>
+        <div th:if="${errorMessage}" style="color: red; margin-bottom: 1rem;">
+            <p th:text="${errorMessage}"></p>
+        </div>
+        <!-- Category Table -->
+        <table class="product-table" id="categoryTable">
+            <thead>
+            <tr>
+                <th>Category Name</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Displaying categories -->
+            <tr th:each="category : ${categories}">
+                <td th:text="${category.name}"></td>
+                <td>
+                    <button type="button" class="edit-button" th:onclick="'loadCategory(' + ${category.id} + ')'">Edit</button>
+                    <form th:action="@{/category/delete/{id}(id=${category.id})}" method="post" style="display:inline;" onsubmit="return confirmDelete()">
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                        <button type="submit" class="delete-button">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Add Category Modal -->
+    <div class="modal" id="addCategoryModal" style="display: none;">
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3 class="modal__title">Add Category</h3>
+                <button class="modal__close" type="button" onclick="closeAddModal()">×</button>
+            </div>
+            <div class="modal__body">
+                <form id="addCategoryForm" th:action="@{/category/add}" method="post">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                    <div class="form-group">
+                        <label for="addCategoryName">Name</label>
+                        <input type="text" id="addCategoryName" name="name" placeholder="Category Name" required />
+                    </div>
+                </form>
+            </div>
+            <div class="modal__footer">
+                <button class="modal__button modal__cancel" type="button" onclick="closeAddModal()">Cancel</button>
+                <button class="modal__button" type="submit" form="addCategoryForm">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Category Modal -->
+    <div class="modal" id="categoryModal" style="display: none;">
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3 class="modal__title">Update Category</h3>
+                <button class="modal__close" type="button" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal__body">
+                <form id="updateCategoryForm" th:action="@{/category/save}" method="post">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                    <input type="hidden" id="categoryId" name="id" />
+                    <div class="form-group">
+                        <label for="updateCategoryName">Name</label>
+                        <input type="text" id="updateCategoryName" name="name" placeholder="Category Name" required />
+                    </div>
+                </form>
+            </div>
+            <div class="modal__footer">
+                <button class="modal__button modal__cancel" type="button" onclick="closeModal()">Cancel</button>
+                <button class="modal__button" type="submit" form="updateCategoryForm">Save</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!--========== FOOTER ==========-->
+<footer class="footer">
+    <p>© 2025 StockApp. All rights reserved.</p>
+</footer>
+
+<!--========== MAIN JS ==========-->
+<script src="/js/main.js"></script>
+<script>
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const searchQuery = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#categoryTable tbody tr');
+
+        rows.forEach(row => {
+            const categoryName = row.cells[0].textContent.toLowerCase();
+            if (categoryName.includes(searchQuery)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // Open Add Modal
+    function openAddModal() {
+        document.getElementById('addCategoryModal').style.display = 'flex';
+        document.getElementById('addCategoryName').value = ''; // Clear the input field
+    }
+
+    // Close Add Modal
+    function closeAddModal() {
+        document.getElementById('addCategoryModal').style.display = 'none';
+    }
+
+    function loadCategory(categoryId) {
+        fetch(`/category/${categoryId}`, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('Category not found');
+                    } else if (response.status === 403) {
+                        throw new Error('You do not have permission to access this category');
+                    } else {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data) {
+                    throw new Error('Received empty category data');
+                }
+                // Populate modal fields with category data
+                document.getElementById('categoryId').value = data.id;
+                document.getElementById('updateCategoryName').value = data.name;
+
+                // Show modal
+                document.getElementById('categoryModal').style.display = 'flex';
+            })
+            .catch(error => {
+                console.error('Error loading category:', error.message);
+                alert('Failed to load category for editing: ' + error.message + '. Please try again.');
+            });
+    }
+
+    function closeModal() {
+        document.getElementById('categoryModal').style.display = 'none';
+    }
+
+    function confirmDelete() {
+        return confirm('Are you sure you want to delete this category?');
+    }
+
+    // Close modals when clicking outside
+    document.getElementById('categoryModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeModal();
+        }
+    });
+
+    document.getElementById('addCategoryModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeAddModal();
+        }
+    });
+</script>
+</body>
+</html>

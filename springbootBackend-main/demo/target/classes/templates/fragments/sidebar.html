@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<div th:fragment="sidebar">
+    <div class="nav" id="navbar">
+        <nav class="nav__container">
+            <div>
+                <a href="/index" class="nav__link nav__logo">
+                    <i class='bx bx-store nav__icon'></i>
+                    <span class="nav__logo-name">StockApp</span>
+                </a>
+
+                <div class="nav__list">
+                    <div class="nav__items">
+                        <h3 class="nav__subtitle">Inventory</h3>
+
+                        <a href="/index" class="nav__link">
+                            <i class='bx bx-home nav__icon'></i>
+                            <span class="nav__name">Dashboard</span>
+                        </a>
+
+                        <div class="nav__dropdown">
+                            <a href="#" class="nav__link">
+                                <i class='bx bx-box nav__icon'></i>
+                                <span class="nav__name">Product</span>
+                                <i class='bx bx-chevron-down nav__icon nav__dropdown-icon'></i>
+                            </a>
+                            <div class="nav__dropdown-collapse">
+                                <div class="nav__dropdown-content">
+                                    <a href="/product" class="nav__dropdown-item">Product List</a>
+                                    <a href="/product/addproduct" class="nav__dropdown-item">Add Product</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="/category" class="nav__link">
+                            <i class='bx bx-category nav__icon'></i>
+                            <span class="nav__name">Category</span>
+                        </a>
+
+                        <a href="/supplier" class="nav__link">
+                            <i class='bx bx-briefcase nav__icon'></i>
+                            <span class="nav__name">Suppliers</span>
+                        </a>
+                        <a href="/users" class="nav__link" sec:authorize="hasRole('ROLE_ADMIN')">
+                            <i class='bx bx-user nav__icon'></i>
+                            <span class="nav__name" >User Management</span>
+                        </a>
+
+
+                    </div>
+
+                    <div class="nav__items">
+                        <h3 class="nav__subtitle" sec:authorize="hasRole('ROLE_ADMIN')">Transactions</h3>
+
+                        <a href="/product/withdrawal" class="nav__link" sec:authorize="hasRole('ROLE_ADMIN')">
+                            <i class='bx bx-package nav__icon'></i>
+                            <span class="nav__name">Withdrawals</span>
+                        </a>
+
+                        <div class="nav__dropdown" sec:authorize="hasRole('ROLE_ADMIN')">
+                            <a href="#" class="nav__link">
+                                <i class='bx bx-history nav__icon'></i>
+                                <span class="nav__name">Stock History</span>
+                                <i class='bx bx-chevron-down nav__icon nav__dropdown-icon'></i>
+                            </a>
+                            <div class="nav__dropdown-collapse">
+                                <div class="nav__dropdown-content">
+                                    <a href="/product/stockentries" class="nav__dropdown-item">Stock Entries</a>
+                                    <a href="/product/stockwithdrawals" class="nav__dropdown-item">Stock Withdrawals</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="/reports/batch-receipts" class="nav__link" sec:authorize="hasRole('ROLE_ADMIN')">
+                            <i class='bx bx-printer nav__icon'></i>
+                            <span class="nav__name">Batch Receipts</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/logout" class="nav__link nav__logout">
+                <i class='bx bx-log-out nav__icon'></i>
+                <span class="nav__name">Log Out</span>
+            </a>
+        </nav>
+    </div>
+</div>
+</body>
+</html>

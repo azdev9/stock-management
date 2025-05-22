@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--========== BOX ICONS ==========-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+
+    <!--========== CSS ==========-->
+    <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/style.css">
+
+    <title>Withdrawal - StockApp</title>
+
+    <style>
+        /* Container for header and button */
+        .product-management-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+
+        }
+
+        /* Style for comboboxes (select elements) */
+        select {
+            -webkit-appearance: none; /* For Chrome, Safari, Edge */
+            -moz-appearance: none;    /* For Firefox */
+            appearance: none;         /* Standard */
+            background-color: var(--container-color);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 0.25rem;
+            padding: 0.75rem 2.5rem 0.75rem 0.75rem; /* Increased right padding to 2.5rem to give space for the arrow */
+            font-size: var(--small-font-size);
+            font-family: var(--body-font);
+            color: var(--text-color);
+            cursor: pointer;
+            width: 100%; /* Ensure consistent width */
+            box-sizing: border-box; /* Prevent padding from affecting width */
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: calc(100% - 1rem) center; /* Position arrow 1rem from the right edge */
+            background-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        select:hover {
+            border-color: var(--first-color-light);
+        }
+
+        select:focus {
+            border-color: var(--first-color);
+            box-shadow: 0 0 5px rgba(46, 204, 113, 0.3);
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+<!--========== HEADER ==========-->
+<header class="header">
+    <div class="header__container">
+        <img src="/images/profile-img.png" alt="Profile" class="header__img">
+        <a href="#" class="header__logo">StockApp</a>
+        <div class="header__search">
+            <input type="search" placeholder="Search by Product Name" class="header__input" id="searchInput">
+            <i class='bx bx-search header__icon'></i>
+        </div>
+        <div class="header__toggle">
+            <i class='bx bx-menu' id="header-toggle"></i>
+        </div>
+    </div>
+</header>
+
+<!--========== NAV ==========-->
+<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+<!--========== CONTENTS ==========-->
+<main>
+    <section class="product-management">
+        <div class="product-management-header">
+            <h2>Create Withdrawal</h2>
+            <a href="/product" class="modal__button">Back to Products</a>
+        </div>
+        <div th:if="${errorMessage}" class="error">
+            <p th:text="${errorMessage}"></p>
+        </div>
+        <form id="withdrawalForm" th:action="@{/product/withdrawal}" method="post" th:object="${withdrawalForm}" onsubmit="return validateForm()" class="product-form">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+            <div class="form-group">
+                <label for="categoryFilter">Filter by Category</label>
+                <select id="categoryFilter" name="categoryId">
+                    <option value="">All Categories</option>
+                    <option th:each="category : ${categories}"
+                            th:value="${category.id}"
+                            th:text="${category.name}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="transactionReason">Withdrawal Reason</label>
+                <input type="text" id="transactionReason" th:field="*{transactionReason}" placeholder="e.g., Sale, Damaged" required />
+                <span th:if="${#fields.hasErrors('transactionReason')}" th:errors="*{transactionReason}" class="error"></span>
+            </div>
+            <div class="destinataire-section">
+                <h3 style="margin-top: 0;">Destinataire</h3>
+                <div class="form-group destinataire-toggle">
+                    <label>Choose Destinataire Option:</label>
+                    <input type="radio" id="existingDestinataire" name="destinataireOption" value="existing" onchange="toggleDestinataireFields()" checked>
+                    <label for="existingDestinataire">Select Existing Destinataire</label>
+                    <input type="radio" id="newDestinataire" name="destinataireOption" value="new" onchange="toggleDestinataireFields()">
+                    <label for="newDestinataire">Create New Destinataire</label>
+                </div>
+                <div class="form-group" id="existingDestinataireField">
+                    <label for="destinataireId">Select Destinataire</label>
+                    <select id="destinataireId" name="destinataireId">
+                        <option value="">Select an existing Destinataire</option>
+                        <option th:each="destinataire : ${destinataires}"
+                                th:value="${destinataire.id}"
+                                th:text="${destinataire.name}"></option>
+                    </select>
+                </div>
+                <div id="newDestinataireFields">
+                    <div class="form-group">
+                        <label for="newDestinataireName">Destinataire Name</label>
+                        <input type="text" id="newDestinataireName" th:field="*{newDestinataireName}" placeholder="Enter Destinataire name" />
+                    </div>
+                    <div class="form-group">
+                        <label for="newDestinataireEmail">Destinataire Email (Optional)</label>
+                        <input type="email" id="newDestinataireEmail" name="newDestinataireEmail" placeholder="Enter email" />
+                    </div>
+                    <div class="form-group">
+                        <label for="newDestinataireAddress">Destinataire Address (Optional)</label>
+                        <input type="text" id="newDestinataireAddress" name="newDestinataireAddress" placeholder="Enter address" />
+                    </div>
+                </div>
+            </div>
+            <table class="product-table" id="productTable">
+                <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Available Quantity</th>
+                    <th>Price</th>
+                    <th>Withdrawal Quantity</th>
+                    <th>Total</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product, iterStat : ${products}" th:class="${product.category?.id}">
+                    <td>
+                        <input type="checkbox" th:name="'productIds[' + ${iterStat.index} + ']'" th:value="${product.id}" class="product-checkbox" />
+                    </td>
+                    <td th:text="${product.productName}"></td>
+                    <td th:text="${product.category?.name} ?: 'N/A'"></td>
+                    <td th:text="${product.quantity}"></td>
+                    <td th:text="${product.price}"></td>
+                    <td>
+                        <input type="number" th:name="'quantities[' + ${iterStat.index} + ']'" min="0" th:max="${product.quantity}" class="quantity-input" value="0" />
+                    </td>
+                    <td class="product-total">0</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="total-price">
+                Total Price: <span id="totalPrice">0.00</span>
+            </div>
+            <div class="form-group">
+                <button type="submit">Submit Withdrawal</button>
+            </div>
+        </form>
+    </section>
+</main>
+
+<!--========== FOOTER ==========-->
+<footer class="footer">
+    <p>© 2025 StockApp. All rights reserved.</p>
+</footer>
+
+<!--========== MAIN JS ==========-->
+<script src="/js/main.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const categoryFilter = document.getElementById('categoryFilter');
+        const productTable = document.getElementById('productTable');
+        const totalPriceSpan = document.getElementById('totalPrice');
+        let totalPrice = 0;
+
+        if (productTable) {
+            window.toggleDestinataireFields = function() {
+                const existingOption = document.getElementById('existingDestinataire').checked;
+                document.getElementById('existingDestinataireField').style.display = existingOption ? 'block' : 'none';
+                document.getElementById('newDestinataireFields').style.display = existingOption ? 'none' : 'block';
+                if (existingOption) {
+                    document.getElementById('newDestinataireName').value = '';
+                    document.getElementById('newDestinataireEmail').value = '';
+                    document.getElementById('newDestinataireAddress').value = '';
+                } else {
+                    document.getElementById('destinataireId').value = '';
+                }
+            };
+
+            toggleDestinataireFields();
+
+            categoryFilter.addEventListener('change', function() {
+                const selectedCategory = this.value;
+                const rows = productTable.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const rowCategory = row.className;
+                    if (!selectedCategory || rowCategory === selectedCategory) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+
+            const checkboxes = productTable.querySelectorAll('.product-checkbox');
+            if (checkboxes) {
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        const quantityInput = this.closest('tr').querySelector('.quantity-input');
+                        if (!quantityInput) {
+                            console.error(`No quantity input found for product ${this.value}`);
+                            return;
+                        }
+                        console.log(`Checkbox ${this.value} checked: ${this.checked}`);
+                        if (!this.checked) {
+                            quantityInput.value = '0';
+                            updateProductTotal(this.closest('tr'));
+                        }
+                    });
+                });
+            }
+
+            const quantityInputs = productTable.querySelectorAll('.quantity-input');
+            if (quantityInputs) {
+                quantityInputs.forEach(input => {
+                    input.addEventListener('input', function() {
+                        console.log(`Quantity input ${this.name} changed to: ${this.value}`);
+                        updateProductTotal(this.closest('tr'));
+                    });
+                });
+            }
+
+            function updateProductTotal(row) {
+                const quantityInput = row.querySelector('.quantity-input');
+                if (!quantityInput) {
+                    console.error(`No quantity input found in row`);
+                    return;
+                }
+                const price = parseFloat(row.cells[4].textContent);
+                const quantity = parseInt(quantityInput.value) || 0;
+                const total = (price * quantity).toFixed(2);
+                row.querySelector('.product-total').textContent = total;
+
+                totalPrice = 0;
+                productTable.querySelectorAll('.product-total').forEach(totalCell => {
+                    totalPrice += parseFloat(totalCell.textContent) || 0;
+                });
+                totalPriceSpan.textContent = totalPrice.toFixed(2);
+            }
+
+            window.validateForm = function() {
+                const form = document.getElementById('withdrawalForm');
+                const checkboxes = productTable.querySelectorAll('.product-checkbox:checked');
+                const existingOption = document.getElementById('existingDestinataire').checked;
+                const destinataireId = document.getElementById('destinataireId').value;
+                const newDestinataireName = document.getElementById('newDestinataireName').value.trim();
+                console.log(`Validating form, checked checkboxes: ${checkboxes.length}`);
+                if (checkboxes.length === 0) {
+                    alert('Please select at least one product.');
+                    console.log('Validation failed: No products selected');
+                    return false;
+                }
+                if (existingOption && destinataireId === '') {
+                    alert('Please select an existing Destinataire.');
+                    console.log('Validation failed: No existing Destinataire selected');
+                    return false;
+                }
+                if (!existingOption && newDestinataireName === '') {
+                    alert('Please enter a Destinataire name.');
+                    console.log('Validation failed: No new Destinataire name provided');
+                    return false;
+                }
+                let hasValidQuantity = false;
+                form.querySelectorAll('.quantity-input').forEach(input => {
+                    if (!input.closest('tr').querySelector('.product-checkbox:checked')) {
+                        input.value = '0';
+                    }
+                });
+                checkboxes.forEach((checkbox, index) => {
+                    const quantityInput = checkbox.closest('tr').querySelector('.quantity-input');
+                    if (!quantityInput) {
+                        console.error(`No quantity input found for product ${checkbox.value}`);
+                        return;
+                    }
+                    console.log(`Checking quantity for product ${checkbox.value}: ${quantityInput.value}`);
+                    const quantity = parseInt(quantityInput.value) || 0;
+                    if (quantity > 0) {
+                        hasValidQuantity = true;
+                    }
+                });
+                if (!hasValidQuantity) {
+                    alert('Please enter a valid quantity (greater than 0) for at least one selected product.');
+                    console.log('Validation failed: No valid quantities');
+                    return false;
+                }
+                const formData = new FormData(form);
+                console.log('Form data:');
+                for (const [key, value] of formData.entries()) {
+                    console.log(`${key}: ${value}`);
+                }
+                console.log('Validation passed');
+                return true;
+            };
+        } else {
+            console.warn('Product table not found');
+        }
+    });
+
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const searchQuery = this.value.toLowerCase();
+        const productTable = document.getElementById('productTable');
+        if (productTable) {
+            const rows = productTable.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const productName = row.cells[1].textContent.toLowerCase();
+                if (productName.includes(searchQuery)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c193312cbc32e3',t:'MTc0NjYyOTkwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c98a226c35b040',t:'MTc0NjcxMzQxNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

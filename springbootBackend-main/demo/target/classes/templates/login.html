@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - StockApp</title>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <link rel="stylesheet" href="/css/register.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+<section class="auth-section">
+    <div class="form-container">
+        <h2>Login</h2>
+        <div th:if="${param.error}" class="error-message">
+            <p>Invalid username or password. Please try again.</p>
+        </div>
+        <div th:if="${param.logout}" class="error-message" style="color: green;">
+            <p>You have been logged out successfully.</p>
+        </div>
+        <form th:action="@{/req/login}" method="post">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+            <div class="inputbox">
+                <label for="username">Username</label>
+                <ion-icon name="person-outline"></ion-icon>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="inputbox">
+                <label for="password">Password</label>
+                <ion-icon name="lock-closed-outline"></ion-icon>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="/req/signup">Sign Up</a></p>
+        <div id="error-message" class="error-message" style="display: none;"></div>
+    </div>
+</section>
+</body>
+</html>

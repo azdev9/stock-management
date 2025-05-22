@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--========== BOX ICONS ==========-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+
+    <!--========== CSS ==========-->
+    <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/style.css">
+
+    <title>Products - StockApp</title>
+
+    <style>
+        /* Add styling for the header section with flexbox */
+        .product-management-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .product-management-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .product-management-header a.modal__button {
+            text-decoration: none;
+        }
+
+        /* Adjust table layout */
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .product-table th, .product-table td {
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        /* Distribute width across content columns */
+        .product-table th:not(:last-child),
+        .product-table td:not(:last-child) {
+            width: calc(85% / 7); /* Distribute 85% width across 7 content columns */
+        }
+
+        /* Align actions to the right and ensure enough space */
+        .product-table th:last-child,
+        .product-table td:last-child {
+            width: 15%; /* Increased width to accommodate buttons side by side */
+            text-align: right;
+            white-space: nowrap; /* Prevent wrapping */
+        }
+
+        /* Ensure buttons are inline */
+        .product-table td:last-child > * {
+            display: inline-block;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        /* Optional: Adjust button styles for better appearance */
+        .edit-button, .delete-button {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Center the modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal__content {
+            max-width: 500px;
+            width: 90%;
+            margin: auto;
+        }
+
+        /* Ensure the select dropdown is styled properly */
+        select {
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* Hide reason field by default */
+        #reasonField {
+            display: none;
+        }
+
+        /* Error messages */
+        .error {
+            color: red;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+<!--========== HEADER ==========-->
+<header class="header">
+    <div class="header__container">
+        <img src="/images/profile-img.png" alt="Profile" class="header__img">
+
+        <a href="#" class="header__logo">StockApp</a>
+
+        <div class="header__search">
+            <input type="search" placeholder="Search by Product Name" class="header__input" id="searchInput">
+            <i class='bx bx-search header__icon'></i>
+        </div>
+
+        <div class="header__toggle">
+            <i class='bx bx-menu' id="header-toggle"></i>
+        </div>
+    </div>
+</header>
+
+<!--========== NAV ==========-->
+<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+<!--========== CONTENTS ==========-->
+<main>
+    <!-- Product Management Container -->
+    <section class="product-management">
+        <div class="product-management-header">
+            <h2>Product List</h2>
+            <a href="/product/addproduct" class="modal__button">Add Product</a>
+        </div>
+        <div th:if="${errorMessage}" class="error">
+            <p th:text="${errorMessage}"></p>
+        </div>
+        <!-- Product Table -->
+        <table class="product-table" id="productTable">
+            <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Supplier</th>
+                <th>Price</th>
+                <th>Date</th>
+                <th>Image</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Displaying products -->
+            <tr th:each="product : ${products}">
+                <td th:text="${product.productName}"></td>
+                <td th:text="${product.category?.name} ?: 'N/A'"></td>
+                <td th:text="${product.quantity}"></td>
+                <td th:text="${product.supplier?.name} ?: 'No supplier'"></td>
+                <td th:text="${product.price}"></td>
+                <td th:text="${product.date}"></td>
+                <td>
+                    <img th:if="${product.image != null}" th:src="${product.image}" alt="Product Image" width="100" />
+                    <span th:if="${product.image == null}">No image available</span>
+                </td>
+                <td>
+                    <button type="button" class="edit-button" th:onclick="'loadProduct(' + ${product.id} + ')'">Edit</button>
+                    <form th:action="@{/product/delete/{id}(id=${product.id})}" method="post" style="display:inline;" onsubmit="return confirmDelete()">
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                        <button type="submit" class="delete-button">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Update Product Modal -->
+    <div class="modal" id="productModal" style="display: none;">
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3 class="modal__title">Update Product</h3>
+                <button class="modal__close" type="button" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal__body">
+                <form id="updateProductForm" th:action="@{/product/update}" th:object="${product}" method="post">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                    <input type="hidden" th:field="*{id}" id="productId" />
+                    <input type="hidden" id="originalQuantity" th:value="*{quantity}" />
+                    <div class="form-group">
+                        <label for="updateProductName">Name</label>
+                        <input type="text" th:field="*{productName}" id="updateProductName" placeholder="Product Name" required />
+                        <span th:if="${#fields.hasErrors('productName')}" th:errors="*{productName}" class="error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateProductCategory">Category</label>
+                        <select th:field="*{category.id}" id="updateProductCategory" required>
+                            <option value="">Select a category</option>
+                            <option th:each="category : ${categories}"
+                                    th:value="${category.id}"
+                                    th:text="${category.name}"></option>
+                        </select>
+                        <span th:if="${#fields.hasErrors('category.id')}" th:errors="*{category.id}" class="error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateProductQuantity">Quantity</label>
+                        <input type="number" th:field="*{quantity}" id="updateProductQuantity" placeholder="Quantity" required />
+                        <span th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}" class="error"></span>
+                    </div>
+                    <div class="form-group" id="reasonField">
+                        <label for="transactionReason">Reason for Withdrawal</label>
+                        <input type="text" id="transactionReason" name="transactionReason" placeholder="e.g., Sale, Damaged" />
+                    </div>
+                    <div class="form-group">
+                        <label for="updateProductSupplier">Supplier</label>
+                        <select th:field="*{supplier.id}" id="updateProductSupplier">
+                            <option value="">Select a supplier</option>
+                            <option th:each="supplier : ${suppliers}"
+                                    th:value="${supplier.id}"
+                                    th:text="${supplier.name}"
+                                    th:disabled="${supplier.status == 'INACTIVE'}"></option>
+                        </select>
+                        <span th:if="${#fields.hasErrors('supplier.id')}" th:errors="*{supplier.id}" class="error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateProductPrice">Price</label>
+                        <input type="number" step="0.01" th:field="*{price}" id="updateProductPrice" placeholder="Price" required />
+                        <span th:if="${#fields.hasErrors('price')}" th:errors="*{price}" class="error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateProductDate">Date</label>
+                        <input type="date" th:field="*{date}" id="updateProductDate" required />
+                        <span th:if="${#fields.hasErrors('date')}" th:errors="*{date}" class="error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateProductImg">Image URL</label>
+                        <input type="url" th:field="*{image}" id="updateProductImg" placeholder="Image URL" />
+                        <span th:if="${#fields.hasErrors('image')}" th:errors="*{image}" class="error"></span>
+                    </div>
+                    <div class="modal__footer">
+                        <button class="modal__button modal__cancel" type="button" onclick="closeModal()">Cancel</button>
+                        <button class="modal__button" type="submit">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!--========== FOOTER ==========-->
+<footer class="footer">
+    <p>© 2025 StockApp. All rights reserved.</p>
+</footer>
+
+<!--========== MAIN JS ==========-->
+<script src="/js/main.js"></script>
+<script>
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const searchQuery = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#productTable tbody tr');
+
+        rows.forEach(row => {
+            const productName = row.cells[0].textContent.toLowerCase();
+            if (productName.includes(searchQuery)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    function loadProduct(productId) {
+        fetch(`/product/${productId}`, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('Product not found');
+                    } else if (response.status === 403) {
+                        throw new Error('You do not have permission to access this product');
+                    } else {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data) {
+                    throw new Error('Received empty product data');
+                }
+                // Populate modal fields with product data
+                document.getElementById('productId').value = data.id;
+                document.getElementById('updateProductName').value = data.productName;
+
+                // Set the selected category in the dropdown
+                const categorySelect = document.getElementById('updateProductCategory');
+                categorySelect.value = data.category ? data.category.id : '';
+
+                document.getElementById('updateProductQuantity').value = data.quantity;
+                document.getElementById('originalQuantity').value = data.quantity;
+
+                // Set the selected supplier
+                const supplierSelect = document.getElementById('updateProductSupplier');
+                supplierSelect.value = data.supplier ? data.supplier.id : '';
+
+                document.getElementById('updateProductPrice').value = data.price;
+                document.getElementById('updateProductImg').value = data.image || '';
+
+                // Handle the date field
+                const dateInput = document.getElementById('updateProductDate');
+                if (data.date) {
+                    dateInput.value = data.date;
+                } else {
+                    const today = new Date();
+                    const year = today.getFullYear();
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const day = String(today.getDate()).padStart(2, '0');
+                    dateInput.value = `${year}-${month}-${day}`;
+                }
+
+                // Reset transaction reason
+                document.getElementById('transactionReason').value = '';
+                document.getElementById('reasonField').style.display = 'none';
+
+                // Show modal
+                document.getElementById('productModal').style.display = 'flex';
+
+                // Add event listener for quantity change
+                const quantityInput = document.getElementById('updateProductQuantity');
+                quantityInput.addEventListener('input', function() {
+                    const originalQty = parseInt(document.getElementById('originalQuantity').value);
+                    const newQty = parseInt(this.value);
+                    const reasonField = document.getElementById('reasonField');
+                    if (newQty < originalQty) {
+                        reasonField.style.display = 'block';
+                    } else {
+                        reasonField.style.display = 'none';
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error loading product:', error.message);
+                alert('Failed to load product for editing: ' + error.message + '. Please try again.');
+            });
+    }
+
+    function closeModal() {
+        document.getElementById('productModal').style.display = 'none';
+        document.getElementById('reasonField').style.display = 'none';
+        document.getElementById('transactionReason').value = '';
+    }
+
+    function confirmDelete() {
+        return confirm('Are you sure you want to delete this product?');
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('productModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeModal();
+        }
+    });
+</script>
+</body>
+</html>
