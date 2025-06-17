@@ -1,0 +1,643 @@
+/* Variables harmonisées avec le dashboard */
+:root {
+    /* Couleurs principales du sidebar */
+    --primary-color: #6923D0;
+    --primary-light: #F4F0FA;
+    --title-color: #19181B;
+    --text-color: #58555E;
+    --text-color-light: #A5A1AA;
+    --body-color: #F9F6FD;
+    --container-color: #FFFFFF;
+
+    /* Gradients alignés avec dashboard.css */
+    --primary-gradient: linear-gradient(135deg, #6923D0 0%, #8B5CF6 100%);
+    --secondary-gradient: linear-gradient(135deg, #F4F0FA 0%, #E5DEFF 100%);
+    --success-gradient: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+    --warning-gradient: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+    --danger-gradient: linear-gradient(135deg, #EF4444 0%, #F87171 100%);
+    --info-gradient: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
+    --cancel-gradient: linear-gradient(135deg, #D1D5DB 0%, #E5E7EB 100%);
+
+    /* Couleurs de fond et ombres */
+    --light: #FFFFFF;
+    --dark: #19181B;
+    --shadow-light: rgba(105, 35, 208, 0.08);
+    --shadow-medium: rgba(105, 35, 208, 0.12);
+    --shadow-strong: rgba(105, 35, 208, 0.18);
+    --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+    /* Typographie */
+    --font-family: 'Poppins', sans-serif;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+
+    /* Espacements */
+    --spacing-1: 0.25rem;
+    --spacing-2: 0.5rem;
+    --spacing-3: 0.75rem;
+    --spacing-4: 1rem;
+    --spacing-5: 1.25rem;
+    --spacing-6: 1.5rem;
+    --spacing-8: 2rem;
+    --spacing-10: 2.5rem;
+    --spacing-12: 3rem;
+
+    /* Border radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+
+    /* Transitions */
+    --transition-fast: all 0.15s ease-in-out;
+    --transition-normal: all 0.3s ease-in-out;
+    --transition-slow: all 0.5s ease-in-out;
+}
+
+/* Mode sombre */
+body.dark {
+    --light: #1F2937;
+    --dark: #F9FAFB;
+    --container-color: #374151;
+    --body-color: #111827;
+    --text-color: #D1D5DB;
+    --text-color-light: #9CA3AF;
+    --shadow-light: rgba(255, 255, 255, 0.05);
+    --shadow-medium: rgba(255, 255, 255, 0.1);
+    --shadow-strong: rgba(255, 255, 255, 0.15);
+}
+
+/* Reset et base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Container principal du dashboard */
+.dashboard {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--spacing-8);
+    font-family: var(--font-family);
+    background: var(--body-color);
+    min-height: calc(100vh - 4rem);
+    position: relative;
+}
+
+/* En-tête de la page */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-8);
+    padding: var(--spacing-6);
+    background: var(--container-color);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(105, 35, 208, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--primary-gradient);
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+}
+
+.page-title-container {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+}
+
+.page-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.75rem;
+    color: white;
+    box-shadow: 0 8px 25px rgba(105, 35, 208, 0.3);
+}
+
+.page-title-content h2 {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--title-color);
+    margin: 0 0 var(--spacing-1);
+}
+
+.page-subtitle {
+    font-size: var(--font-size-base);
+    color: var(--text-color-light);
+    margin: 0;
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-4) var(--spacing-6);
+    background: var(--danger-gradient);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    transition: var(--transition-normal);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.back-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+/* Container du formulaire */
+.form-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--spacing-8);
+    align-items: start;
+}
+
+/* Carte du formulaire */
+.form-card {
+    background: var(--container-color);
+    border-radius: var(--radius-2xl);
+    padding: var(--spacing-8);
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(105, 35, 208, 0.1);
+    transition: var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.form-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--success-gradient);
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+}
+
+.form-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: rgba(105, 35, 208, 0.2);
+}
+
+/* En-tête du formulaire */
+.form-header {
+    margin-bottom: var(--spacing-8);
+}
+
+.form-header h3 {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--title-color);
+    margin: 0 0 var(--spacing-2);
+    position: relative;
+}
+
+.form-header h3::after {
+    content: '';
+    position: absolute;
+    bottom: calc(-1 * var(--spacing-2));
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background: var(--primary-gradient);
+    border-radius: var(--radius-sm);
+}
+
+.form-header p {
+    font-size: var(--font-size-base);
+    color: var(--text-color-light);
+    margin: 0;
+}
+
+/* Grille du formulaire */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-6);
+    margin-bottom: var(--spacing-6);
+}
+
+/* Groupes de formulaire */
+.form-group {
+    position: relative;
+    transition: var(--transition-normal);
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group.focused {
+    transform: translateY(-2px);
+}
+
+/* Labels */
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: var(--spacing-3);
+    transition: var(--transition-fast);
+}
+
+.form-group.focused label,
+.form-group.filled label {
+    color: var(--primary-color);
+}
+
+.form-group label i {
+    font-size: var(--font-size-lg);
+    color: var(--primary-color);
+}
+
+/* Inputs */
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: var(--spacing-4);
+    border: 2px solid rgba(105, 35, 208, 0.1);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-base);
+    font-family: var(--font-family);
+    background: var(--container-color);
+    color: var(--text-color);
+    transition: var(--transition-normal);
+    outline: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(105, 35, 208, 0.1);
+    transform: translateY(-1px);
+}
+
+.form-group input:hover,
+.form-group select:hover {
+    border-color: rgba(105, 35, 208, 0.2);
+}
+
+.form-group input::placeholder {
+    color: var(--text-color-light);
+}
+
+/* Wrapper pour les selects */
+.select-wrapper {
+    position: relative;
+}
+
+.select-wrapper select {
+    appearance: none;
+    cursor: pointer;
+    padding-right: var(--spacing-10);
+}
+
+.select-icon {
+    position: absolute;
+    right: var(--spacing-4);
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: var(--font-size-lg);
+    color: var(--text-color-light);
+    pointer-events: none;
+    transition: var(--transition-fast);
+}
+
+.form-group.focused .select-icon {
+    color: var(--primary-color);
+    transform: translateY(-50%) rotate(180deg);
+}
+
+/* Messages d'erreur */
+.error-message {
+    display: block;
+    color: #DC2626;
+    font-size: var(--font-size-xs);
+    margin-top: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-3);
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid #DC2626;
+}
+
+/* Actions du formulaire */
+.form-actions {
+    display: flex;
+    gap: var(--spacing-4);
+    justify-content: flex-end;
+    margin-top: var(--spacing-8);
+    padding-top: var(--spacing-6);
+    border-top: 1px solid rgba(105, 35, 208, 0.1);
+}
+
+/* Boutons */
+.btn-primary,
+.btn-secondary {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-4) var(--spacing-6);
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    text-decoration: none;
+    min-width: 140px;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 4px 15px rgba(105, 35, 208, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(105, 35, 208, 0.4);
+}
+
+.btn-secondary {
+    background: var(--cancel-gradient);
+    color: var(--text-color);
+    border: 2px solid rgba(105, 35, 208, 0.1);
+}
+
+.btn-secondary:hover {
+    background: rgba(105, 35, 208, 0.05);
+    border-color: rgba(105, 35, 208, 0.2);
+    transform: translateY(-1px);
+}
+
+/* Carte d'aide */
+.help-card {
+    background: var(--container-color);
+    border-radius: var(--radius-2xl);
+    padding: var(--spacing-6);
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(105, 35, 208, 0.1);
+    position: sticky;
+    top: var(--spacing-8);
+    transition: var(--transition-normal);
+    overflow: hidden;
+}
+
+.help-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--info-gradient);
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+}
+
+.help-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: rgba(105, 35, 208, 0.2);
+}
+
+.help-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-5);
+}
+
+.help-header i {
+    font-size: var(--font-size-xl);
+    color: var(--primary-color);
+}
+
+.help-header h4 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--title-color);
+    margin: 0;
+}
+
+.tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-4);
+    padding: var(--spacing-3);
+    border-radius: var(--radius-md);
+    transition: var(--transition-fast);
+}
+
+.tip-item:hover {
+    background: var(--primary-light);
+}
+
+.tip-item i {
+    font-size: var(--font-size-base);
+    color: var(--primary-color);
+    margin-top: var(--spacing-1);
+    flex-shrink: 0;
+}
+
+.tip-item span {
+    font-size: var(--font-size-sm);
+    color: var(--text-color);
+    line-height: 1.5;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: var(--spacing-6);
+    color: var(--text-color);
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-8);
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1200px) {
+    .dashboard {
+        padding: var(--spacing-6);
+    }
+
+    .form-container {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-6);
+    }
+
+    .help-card {
+        position: static;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .dashboard {
+        padding: var(--spacing-4);
+    }
+
+    .page-header {
+        flex-direction: column;
+        gap: var(--spacing-4);
+        text-align: center;
+    }
+
+    .page-title-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-4);
+    }
+
+    .form-card,
+    .help-card {
+        padding: var(--spacing-6);
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .dashboard {
+        padding: var(--spacing-3);
+    }
+
+    .page-header {
+        padding: var(--spacing-4);
+    }
+
+    .page-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+
+    .page-title-content h2 {
+        font-size: var(--font-size-2xl);
+    }
+
+    .form-card,
+    .help-card {
+        padding: var(--spacing-5);
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: var(--spacing-3);
+    }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.dashboard > * {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.page-header {
+    animation-delay: 0.1s;
+}
+
+.form-card {
+    animation-delay: 0.3s;
+}
+
+.help-card {
+    animation-delay: 0.4s;
+}
+
+/* États de focus et accessibilité */
+.page-header:focus-within,
+.form-card:focus-within,
+.help-card:focus-within {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Scrollbar personnalisée */
+.form-card::-webkit-scrollbar,
+.help-card::-webkit-scrollbar {
+    width: 6px;
+}
+
+.form-card::-webkit-scrollbar-track,
+.help-card::-webkit-scrollbar-track {
+    background: var(--primary-light);
+    border-radius: var(--radius-sm);
+}
+
+.form-card::-webkit-scrollbar-thumb,
+.help-card::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: var(--radius-sm);
+}
+
+.form-card::-webkit-scrollbar-thumb:hover,
+.help-card::-webkit-scrollbar-thumb:hover {
+    background: #5a1ba8;
+}

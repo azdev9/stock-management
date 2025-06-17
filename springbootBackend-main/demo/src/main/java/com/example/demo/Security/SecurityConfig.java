@@ -24,12 +24,16 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/req/login")
                         .defaultSuccessUrl("/index", true)
+                        .failureUrl("/req/login?error=Invalid%20username%20or%20password")
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/req/login?logout")
+                        .logoutSuccessUrl("/req/login?logout=You%20have%20been%20successfully%20logged%20out")
                         .permitAll()
+                )
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/req/login", "/logout")
                 );
         return http.build();
     }

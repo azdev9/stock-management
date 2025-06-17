@@ -17,17 +17,26 @@
 <!--========== HEADER ==========-->
 <header class="header">
     <div class="header__container">
-        <img src="/images/profile-img.png" alt="Profile" class="header__img">
-
-        <a href="#" class="header__logo">StockApp</a>
-
+        <a href="/index" class="header__logo">StockApp</a>
         <div class="header__search">
             <input type="search" placeholder="Search" class="header__input">
             <i class='bx bx-search header__icon'></i>
         </div>
-
-        <div class="header__toggle">
-            <i class='bx bx-menu' id="header-toggle"></i>
+        <div class="header__right">
+            <div class="relative">
+                <img src="/images/profile-img.png" alt="Profile" class="header__img" onclick="toggleDropdown()">
+                <div id="userDropdown" class="dropdown-menu">
+                    <div class="dropdown-item font-bold" th:text="'Logged in as: ' + ${#authentication.principal.username}"></div>
+                    <div class="dropdown-item" th:text="'Role: ' + ${#authentication.principal.role}"></div>
+                    <form action="/logout" method="post" class="dropdown-item">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="logout-button">Logout</button>
+                    </form>
+                </div>
+            </div>
+            <div class="header__toggle">
+                <i class='bx bx-menu' id="header-toggle"></i>
+            </div>
         </div>
     </div>
 </header>
@@ -44,7 +53,7 @@
         </div>
 
         <!-- Add Category Form -->
-        <div class="modal__content">
+        <div class="modal__content" id="">
             <div class="modal__header">
                 <h3 class="modal__title">Add Category</h3>
             </div>
@@ -72,5 +81,6 @@
 
 <!--========== MAIN JS ==========-->
 <script src="/js/main.js"></script>
+
 </body>
 </html>

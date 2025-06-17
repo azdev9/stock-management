@@ -2,39 +2,386 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Login - StockApp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockApp - Smart Inventory Management</title>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <link rel="stylesheet" href="/css/register.css">
-    <script src="/js/main.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-<section class="auth-section">
-    <div class="form-container">
-        <h2>Login</h2>
-        <div th:if="${param.error}" class="error-message">
-            <p>Invalid username or password. Please try again.</p>
-        </div>
-        <div th:if="${param.logout}" class="error-message" style="color: green;">
-            <p>You have been logged out successfully.</p>
-        </div>
-        <form th:action="@{/req/login}" method="post">
-            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
-            <div class="inputbox">
-                <label for="username">Username</label>
-                <ion-icon name="person-outline"></ion-icon>
-                <input type="text" id="username" name="username" required>
+<!-- Header with Navigation -->
+<header class="header">
+    <nav class="nav">
+        <div class="nav-brand">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <div class="logo-text">Stock<span>App</span></div>
             </div>
-            <div class="inputbox">
-                <label for="password">Password</label>
-                <ion-icon name="lock-closed-outline"></ion-icon>
-                <input type="password" id="password" name="password" required>
+        </div>
+        <div class="nav-links">
+            <a href="#features" class="nav-link">Features</a>
+            <a href="#about" class="nav-link">About</a>
+            <a href="#login" class="nav-link btn-outline">Login</a>
+        </div>
+        <div class="hamburger" onclick="toggleMobileMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+</header>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-container">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">
+                    Manage your inventory with
+                    <span class="gradient-text">intelligence</span>
+                </h1>
+                <p class="hero-description">
+                    StockApp revolutionizes inventory management with powerful tools,
+                    real-time analytics, and an intuitive interface. Optimize your
+                    operations and reduce costs today.
+                </p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <h3>99.9%</h3>
+                        <p>Reliability</p>
+                    </div>
+                    <div class="stat">
+                        <h3>50%</h3>
+                        <p>Cost Reduction</p>
+                    </div>
+                    <div class="stat">
+                        <h3>24/7</h3>
+                        <p>Support</p>
+                    </div>
+                </div>
             </div>
-            <button type="submit">Login</button>
-        </form>
-        <p>Don't have an account? <a href="/req/signup">Sign Up</a></p>
-        <div id="error-message" class="error-message" style="display: none;"></div>
+            <div class="hero-visual">
+                <div class="dashboard-preview">
+                    <div class="preview-header">
+                        <div class="preview-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                    <div class="preview-content">
+                        <div class="preview-cards">
+                            <div class="preview-card primary">
+                                <ion-icon name="cube-outline"></ion-icon>
+                                <span>1,247 Products</span>
+                            </div>
+                            <div class="preview-card success">
+                                <ion-icon name="trending-up-outline"></ion-icon>
+                                <span>$156,890</span>
+                            </div>
+                            <div class="preview-card warning">
+                                <ion-icon name="alert-outline"></ion-icon>
+                                <span>12 Alerts</span>
+                            </div>
+                        </div>
+                        <div class="preview-chart">
+                            <div class="chart-bars">
+                                <div class="bar" style="height: 60%"></div>
+                                <div class="bar" style="height: 80%"></div>
+                                <div class="bar" style="height: 45%"></div>
+                                <div class="bar" style="height: 90%"></div>
+                                <div class="bar" style="height: 70%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
+
+<!-- Features Section -->
+<section id="features" class="features">
+    <div class="container">
+        <div class="section-header">
+            <h2>Advanced Features</h2>
+            <p>Discover all the tools you need for optimal management</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon primary">
+                    <ion-icon name="analytics-outline"></ion-icon>
+                </div>
+                <h3>Real-Time Analytics</h3>
+                <p>Track your KPIs and make informed decisions with our interactive dashboards.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon success">
+                    <ion-icon name="notifications-outline"></ion-icon>
+                </div>
+                <h3>Smart Alerts</h3>
+                <p>Receive automatic notifications for low stock levels and required actions.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon warning">
+                    <ion-icon name="shield-checkmark-outline"></ion-icon>
+                </div>
+                <h3>Enhanced Security</h3>
+                <p>Your data is protected with enterprise-level encryption and controlled access.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="about">
+    <div class="container">
+        <div class="about-content">
+            <div class="about-text">
+                <h2>About StockApp</h2>
+                <p>
+                    StockApp is a cutting-edge inventory management solution designed for modern businesses.
+                    Our platform combines advanced technology with intuitive design to streamline your operations
+                    and maximize efficiency.
+                </p>
+                <p>
+                    Founded by a team of industry experts, we understand the challenges businesses face in
+                    managing their inventory. That's why we've created a comprehensive solution that grows
+                    with your business needs.
+                </p>
+                <div class="about-features">
+                    <div class="about-feature">
+                        <div class="about-feature-icon primary">
+                            <ion-icon name="rocket-outline"></ion-icon>
+                        </div>
+                        <div class="about-feature-content">
+                            <h4>Innovation First</h4>
+                            <p>Cutting-edge technology meets practical solutions</p>
+                        </div>
+                    </div>
+                    <div class="about-feature">
+                        <div class="about-feature-icon success">
+                            <ion-icon name="people-outline"></ion-icon>
+                        </div>
+                        <div class="about-feature-content">
+                            <h4>Customer Focused</h4>
+                            <p>Your success is our priority, always</p>
+                        </div>
+                    </div>
+                    <div class="about-feature">
+                        <div class="about-feature-icon info">
+                            <ion-icon name="trending-up-outline"></ion-icon>
+                        </div>
+                        <div class="about-feature-content">
+                            <h4>Scalable Growth</h4>
+                            <p>Solutions that adapt to your business size</p>
+                        </div>
+                    </div>
+                    <div class="about-feature">
+                        <div class="about-feature-icon warning">
+                            <ion-icon name="shield-outline"></ion-icon>
+                        </div>
+                        <div class="about-feature-content">
+                            <h4>Secure & Reliable</h4>
+                            <p>Enterprise-grade security you can trust</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="about-visual">
+                <div class="about-image">
+                    <div class="about-image-content">
+                        <div class="about-logo"></div>
+                        <div class="about-stats">
+                            <div class="about-stat">
+                                <h4>500+</h4>
+                                <p>Companies</p>
+                            </div>
+                            <div class="about-stat">
+                                <h4>2M+</h4>
+                                <p>Products</p>
+                            </div>
+                            <div class="about-stat">
+                                <h4>99.9%</h4>
+                                <p>Uptime</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Login Section -->
+<section id="login" class="auth-section">
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-info">
+                <h2>Log in to Your Account</h2>
+                <p>Access your personalized dashboard and manage your inventory with ease.</p>
+                <div class="auth-benefits">
+                    <div class="benefit">
+                        <ion-icon name="checkmark-circle-outline"></ion-icon>
+                        <span>Intuitive and modern interface</span>
+                    </div>
+                    <div class="benefit">
+                        <ion-icon name="checkmark-circle-outline"></ion-icon>
+                        <span>Detailed and exportable reports</span>
+                    </div>
+                    <div class="benefit">
+                        <ion-icon name="checkmark-circle-outline"></ion-icon>
+                        <span>Multi-user management</span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-container">
+                <div class="form-header">
+                    <h3>Login</h3>
+                    <p>Enter your credentials to access your account</p>
+                </div>
+
+                <!-- Error Message for Incorrect Credentials -->
+                <div th:if="${errorMessage}" class="error-message">
+                    <ion-icon name="alert-circle-outline"></ion-icon>
+                    <p th:text="${errorMessage}">Incorrect username or password. Please try again.</p>
+                </div>
+
+                <!-- Success Message for Logout -->
+                <div th:if="${logoutMessage}" class="success-message">
+                    <ion-icon name="checkmark-circle-outline"></ion-icon>
+                    <p th:text="${logoutMessage}">You have been successfully logged out.</p>
+                </div>
+
+                <form th:action="@{/req/login#login}" method="post" class="login-form">
+                    <input type="hidden" th:if="${_csrf.token}" name="_csrf" th:value="${_csrf.token}"/>
+
+                    <div class="inputbox">
+                        <label for="username">Username</label>
+                        <div class="input-wrapper">
+                            <ion-icon name="person-outline"></ion-icon>
+                            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                        </div>
+                    </div>
+
+                    <div class="inputbox">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <ion-icon name="lock-closed-outline"></ion-icon>
+                            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        <span>Log In</span>
+                        <ion-icon name="arrow-forward-outline"></ion-icon>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>Stock<span>App</span></h3>
+                <p>The complete solution for smart and efficient inventory management.</p>
+            </div>
+            <div class="footer-links">
+                <div class="link-group">
+                    <h4>Product</h4>
+                    <a href="#features">Features</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#demo">Demo</a>
+                </div>
+                <div class="link-group">
+                    <h4>Support</h4>
+                    <a href="#help">Help Center</a>
+                    <a href="#contact">Contact</a>
+                    <a href="#docs">Documentation</a>
+                </div>
+                <div class="link-group">
+                    <h4>Company</h4>
+                    <a href="#about">About</a>
+                    <a href="#careers">Careers</a>
+                    <a href="#press">Press</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 StockApp. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Mobile Navigation
+    function toggleMobileMenu() {
+        const nav = document.querySelector('.nav');
+        nav.classList.toggle('nav-open');
+    }
+
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Scroll to login section on page load if error or logout message
+    window.addEventListener('load', () => {
+        const loginSection = document.querySelector('#login');
+        const errorMessage = document.querySelector('.error-message');
+        const successMessage = document.querySelector('.success-message');
+        const hasErrorOrLogout = window.location.search.includes('error') || window.location.search.includes('logout');
+        if (loginSection && (errorMessage || successMessage || hasErrorOrLogout)) {
+            loginSection.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+
+    // Scroll animation for elements
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, observerOptions);
+
+    // Observe elements to animate
+    document.querySelectorAll('.feature-card, .auth-container, .hero-content, .about-content').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Animation for chart bars
+    setTimeout(() => {
+        document.querySelectorAll('.chart-bars .bar').forEach((bar, index) => {
+            setTimeout(() => {
+                bar.style.transform = 'scaleY(1)';
+            }, index * 100);
+        });
+    }, 1000);
+</script>
 </body>
 </html>

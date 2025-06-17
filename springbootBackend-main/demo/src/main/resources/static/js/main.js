@@ -22,3 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.warn('No nav__link or nav__dropdown-item elements found');
     }
 });
+function toggleDropdown() {
+    const dropdown = document.getElementById('userDropdown');
+    dropdown.classList.toggle('show');
+}

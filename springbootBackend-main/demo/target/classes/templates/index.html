@@ -5,36 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="/css/product.css">
     <link rel="stylesheet" href="/css/style.css">
-
+    <link rel="stylesheet" href="/css/dashboard.css">
     <title>Dashboard - StockApp</title>
-    <style>
-        .dashboard { max-width: 1200px; margin: 0 auto; padding: 1.5rem; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .dashboard-header { display: flex; justify-content: center; align-items: center; margin-bottom: 1rem; }
-        .dashboard-header h2 { margin: 0; font-size: 1.5em; font-weight: bold; text-align: center; }
-        .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .card { background-color: #f4f4f4; padding: 1rem; border-radius: 8px; text-align: center; }
-        .card h3 { margin: 0 0 0.5rem; font-size: 1.2em; }
-        .card p { margin: 0; font-size: 1.5em; font-weight: bold; }
-        .main-content { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
-        .products-table-container, .chart-container { background-color: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .products-table { width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; }
-        .products-table th, .products-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #ddd; }
-        .products-table th { background-color: #6923d0; color: white; }
-        .low-stock { color: red; }
-        .chart-container { max-width: 100%; height: 300px; }
-        .chart-content { width: 100%; height: calc(100% - 2rem); }
-        .transactions-table { width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; }
-        .transactions-table th, .transactions-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #ddd; }
-        .transactions-table th { background-color: #6923d0; color: white; }
-        .error { color: red; font-size: 0.9rem; margin-bottom: 1rem; }
-        @media (max-width: 768px) {
-            .main-content { grid-template-columns: 1fr; }
-            .chart-container { height: 250px; }
-        }
-
-    </style>
 </head>
 <body>
 <header class="header">
@@ -64,29 +37,47 @@
 </header>
 <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 <main>
-    <section class="dashboard">
-        <div class="dashboard-header">
-            <h2>Dashboard</h2>
-        </div>
+    <div class="dashboard">
+        <h2>Dashboard</h2>
         <div th:if="${errorMessage}" class="error">
             <p th:text="${errorMessage}"></p>
         </div>
         <div class="summary-cards">
             <div class="card">
-                <h3>Total Products</h3>
-                <p th:text="${totalProducts}"></p>
+                <div class="icon-container">
+                    <span>📦</span>
+                </div>
+                <div class="card-content">
+                    <h3>Total Products</h3>
+                    <p th:text="${totalProducts}"></p>
+                </div>
             </div>
             <div class="card">
-                <h3>Total Stock Value</h3>
-                <p th:text="'$' + ${#numbers.formatDecimal(totalStockValue, 1, 2)}"></p>
+                <div class="icon-container">
+                    <span>💰</span>
+                </div>
+                <div class="card-content">
+                    <h3>Total Stock Value</h3>
+                    <p th:text="'$' + ${#numbers.formatDecimal(totalStockValue, 1, 2)}"></p>
+                </div>
             </div>
             <div class="card">
-                <h3>Low Stock Alerts</h3>
-                <p th:text="${lowStockCount}"></p>
+                <div class="icon-container">
+                    <span>⚠️</span>
+                </div>
+                <div class="card-content">
+                    <h3>Low Stock Alerts</h3>
+                    <p th:text="${lowStockCount}"></p>
+                </div>
             </div>
             <div class="card" sec:authorize="hasRole('ROLE_ADMIN')">
-                <h3>Recent Transactions</h3>
-                <p th:text="${recentTransactions != null} ? ${recentTransactions.size()} : 0">0</p>
+                <div class="icon-container">
+                    <span>📜</span>
+                </div>
+                <div class="card-content">
+                    <h3>Recent Transactions</h3>
+                    <p th:text="${recentTransactions != null} ? ${recentTransactions.size()} : 0">0</p>
+                </div>
             </div>
         </div>
         <div class="main-content">
@@ -115,13 +106,13 @@
                 </table>
             </div>
             <div class="chart-container">
-                <h3>Stock by Category</h3>
+                <h3>Stock by Product</h3>
                 <div class="chart-content">
                     <canvas id="stockChart"></canvas>
                 </div>
             </div>
         </div>
-        <div sec:authorize="hasRole('ROLE_ADMIN')">
+        <div class="trans" sec:authorize="hasRole('ROLE_ADMIN')">
             <h3>Recent Transactions</h3>
             <table class="transactions-table">
                 <thead>
@@ -147,7 +138,7 @@
                 </tbody>
             </table>
         </div>
-    </section>
+    </div>
 </main>
 <footer class="footer">
     <p>© 2025 StockApp. All rights reserved.</p>
@@ -173,20 +164,20 @@
         let products = /*[[${products}]]*/ [];
         try {
             products = products.map(product => ({
-                category: product.category ? product.category.name : 'Uncategorized',
+                productName: product.productName || 'Unnamed Product',
                 quantity: product.quantity || 0
             }));
         } catch (e) {
             console.error('Error processing products data:', e);
             products = [];
         }
-        const categoryData = products.reduce((acc, product) => {
-            const category = product.category || 'Uncategorized';
-            acc[category] = (acc[category] || 0) + product.quantity;
+        const productData = products.reduce((acc, product) => {
+            const productName = product.productName;
+            acc[productName] = (acc[productName] || 0) + product.quantity;
             return acc;
         }, {});
-        const labels = Object.keys(categoryData);
-        const data = Object.values(categoryData);
+        const labels = Object.keys(productData);
+        const data = Object.values(productData);
         const ctx = document.getElementById('stockChart').getContext('2d');
         new Chart(ctx, {
             type: 'bar',
@@ -195,8 +186,8 @@
                 datasets: [{
                     label: 'Total Quantity',
                     data: data,
-                    backgroundColor: '#6923d0',
-                    borderColor: '#5a1cb3',
+                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--chart-bar-color').trim(),
+                    borderColor: '#468c8a', // Matches --blue for borders
                     borderWidth: 1
                 }]
             },
@@ -204,13 +195,25 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: { beginAtZero: true, title: { display: true, text: 'Quantity' } },
-                    x: { title: { display: true, text: 'Category' } }
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Quantity' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Product' },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
                 },
                 plugins: {
                     legend: { display: false },
                     title: { display: false }
-                }
+                },
+                barPercentage: labels.length > 10 ? 0.4 : 0.8, // Narrower bars for many products
+                categoryPercentage: labels.length > 10 ? 0.5 : 0.9
             }
         });
     });

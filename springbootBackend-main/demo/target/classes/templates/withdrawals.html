@@ -3,71 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!--========== BOX ICONS ==========-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
-
-    <!--========== CSS ==========-->
-    <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/makewithdrawal.css">
     <link rel="stylesheet" href="/css/style.css">
-
     <title>Withdrawal - StockApp</title>
-
-    <style>
-        /* Container for header and button */
-        .product-management-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-
-        }
-
-        /* Style for comboboxes (select elements) */
-        select {
-            -webkit-appearance: none; /* For Chrome, Safari, Edge */
-            -moz-appearance: none;    /* For Firefox */
-            appearance: none;         /* Standard */
-            background-color: var(--container-color);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: 0.25rem;
-            padding: 0.75rem 2.5rem 0.75rem 0.75rem; /* Increased right padding to 2.5rem to give space for the arrow */
-            font-size: var(--small-font-size);
-            font-family: var(--body-font);
-            color: var(--text-color);
-            cursor: pointer;
-            width: 100%; /* Ensure consistent width */
-            box-sizing: border-box; /* Prevent padding from affecting width */
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: calc(100% - 1rem) center; /* Position arrow 1rem from the right edge */
-            background-size: 1rem;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-
-        select:hover {
-            border-color: var(--first-color-light);
-        }
-
-        select:focus {
-            border-color: var(--first-color);
-            box-shadow: 0 0 5px rgba(46, 204, 113, 0.3);
-            outline: none;
-        }
-    </style>
 </head>
 <body>
 <!--========== HEADER ==========-->
 <header class="header">
     <div class="header__container">
-        <img src="/images/profile-img.png" alt="Profile" class="header__img">
-        <a href="#" class="header__logo">StockApp</a>
+        <a href="/index" class="header__logo">StockApp</a>
         <div class="header__search">
-            <input type="search" placeholder="Search by Product Name" class="header__input" id="searchInput">
+            <input type="search" placeholder="Search" class="header__input">
             <i class='bx bx-search header__icon'></i>
         </div>
-        <div class="header__toggle">
-            <i class='bx bx-menu' id="header-toggle"></i>
+        <div class="header__right">
+            <div class="relative">
+                <img src="/images/profile-img.png" alt="Profile" class="header__img" onclick="toggleDropdown()">
+                <div id="userDropdown" class="dropdown-menu">
+                    <div class="dropdown-item font-bold" th:text="'Logged in as: ' + ${#authentication.principal.username}"></div>
+                    <div class="dropdown-item" th:text="'Role: ' + ${#authentication.principal.role}"></div>
+                    <form action="/logout" method="post" class="dropdown-item">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="logout-button">Logout</button>
+                    </form>
+                </div>
+            </div>
+            <div class="header__toggle">
+                <i class='bx bx-menu' id="header-toggle"></i>
+            </div>
         </div>
     </div>
 </header>
@@ -77,99 +41,230 @@
 
 <!--========== CONTENTS ==========-->
 <main>
-    <section class="product-management">
-        <div class="product-management-header">
-            <h2>Create Withdrawal</h2>
-            <a href="/product" class="modal__button">Back to Products</a>
+    <div class="withdrawal-container">
+        <div class="page-header">
+            <div class="page-title">
+                <div class="page-icon">
+                    <i class='bx bx-package'></i>
+                </div>
+                <div>
+                    <h1>Create Withdrawal</h1>
+                    <p>Process product withdrawals with detailed tracking</p>
+                </div>
+            </div>
+            <a href="/product" class="btn-back">
+                <i class='bx bx-arrow-back'></i>
+                Back to Products
+            </a>
         </div>
-        <div th:if="${errorMessage}" class="error">
+
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <i class='bx bx-error'></i>
             <p th:text="${errorMessage}"></p>
         </div>
-        <form id="withdrawalForm" th:action="@{/product/withdrawal}" method="post" th:object="${withdrawalForm}" onsubmit="return validateForm()" class="product-form">
+
+        <form id="withdrawalForm" th:action="@{/product/withdrawal}" method="post" th:object="${withdrawalForm}" onsubmit="return validateForm()" class="withdrawal-form">
             <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
-            <div class="form-group">
-                <label for="categoryFilter">Filter by Category</label>
-                <select id="categoryFilter" name="categoryId">
-                    <option value="">All Categories</option>
-                    <option th:each="category : ${categories}"
-                            th:value="${category.id}"
-                            th:text="${category.name}"></option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="transactionReason">Withdrawal Reason</label>
-                <input type="text" id="transactionReason" th:field="*{transactionReason}" placeholder="e.g., Sale, Damaged" required />
-                <span th:if="${#fields.hasErrors('transactionReason')}" th:errors="*{transactionReason}" class="error"></span>
-            </div>
-            <div class="destinataire-section">
-                <h3 style="margin-top: 0;">Destinataire</h3>
-                <div class="form-group destinataire-toggle">
-                    <label>Choose Destinataire Option:</label>
-                    <input type="radio" id="existingDestinataire" name="destinataireOption" value="existing" onchange="toggleDestinataireFields()" checked>
-                    <label for="existingDestinataire">Select Existing Destinataire</label>
-                    <input type="radio" id="newDestinataire" name="destinataireOption" value="new" onchange="toggleDestinataireFields()">
-                    <label for="newDestinataire">Create New Destinataire</label>
-                </div>
-                <div class="form-group" id="existingDestinataireField">
-                    <label for="destinataireId">Select Destinataire</label>
-                    <select id="destinataireId" name="destinataireId">
-                        <option value="">Select an existing Destinataire</option>
-                        <option th:each="destinataire : ${destinataires}"
-                                th:value="${destinataire.id}"
-                                th:text="${destinataire.name}"></option>
-                    </select>
-                </div>
-                <div id="newDestinataireFields">
+
+            <!-- Form Controls Section -->
+            <div class="form-section">
+                <h3>
+                    <i class='bx bx-filter'></i>
+                    Filter & Settings
+                </h3>
+                <div class="form-grid">
                     <div class="form-group">
-                        <label for="newDestinataireName">Destinataire Name</label>
-                        <input type="text" id="newDestinataireName" th:field="*{newDestinataireName}" placeholder="Enter Destinataire name" />
+                        <label for="categoryFilter">
+                            <i class='bx bx-category'></i>
+                            Filter by Category
+                        </label>
+                        <select id="categoryFilter" name="categoryId">
+                            <option value="">All Categories</option>
+                            <option th:each="category : ${categories}"
+                                    th:value="${category.id}"
+                                    th:text="${category.name}"></option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="newDestinataireEmail">Destinataire Email (Optional)</label>
-                        <input type="email" id="newDestinataireEmail" name="newDestinataireEmail" placeholder="Enter email" />
-                    </div>
-                    <div class="form-group">
-                        <label for="newDestinataireAddress">Destinataire Address (Optional)</label>
-                        <input type="text" id="newDestinataireAddress" name="newDestinataireAddress" placeholder="Enter address" />
+                        <label for="transactionReason">
+                            <i class='bx bx-note'></i>
+                            Withdrawal Reason
+                        </label>
+                        <input type="text" id="transactionReason" th:field="*{transactionReason}" placeholder="e.g., Sale, Damaged, Return" required />
+                        <span th:if="${#fields.hasErrors('transactionReason')}" th:errors="*{transactionReason}" class="field-error"></span>
                     </div>
                 </div>
             </div>
-            <table class="product-table" id="productTable">
-                <thead>
-                <tr>
-                    <th>Select</th>
-                    <th>Product Name</th>
-                    <th>Category</th>
-                    <th>Available Quantity</th>
-                    <th>Price</th>
-                    <th>Withdrawal Quantity</th>
-                    <th>Total</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="product, iterStat : ${products}" th:class="${product.category?.id}">
-                    <td>
-                        <input type="checkbox" th:name="'productIds[' + ${iterStat.index} + ']'" th:value="${product.id}" class="product-checkbox" />
-                    </td>
-                    <td th:text="${product.productName}"></td>
-                    <td th:text="${product.category?.name} ?: 'N/A'"></td>
-                    <td th:text="${product.quantity}"></td>
-                    <td th:text="${product.price}"></td>
-                    <td>
-                        <input type="number" th:name="'quantities[' + ${iterStat.index} + ']'" min="0" th:max="${product.quantity}" class="quantity-input" value="0" />
-                    </td>
-                    <td class="product-total">0</td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="total-price">
-                Total Price: <span id="totalPrice">0.00</span>
+
+            <!-- Destinataire Section -->
+            <div class="form-section">
+                <h3>
+                    <i class='bx bx-user'></i>
+                    Recipient Information
+                </h3>
+                <div class="destinataire-options">
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" id="existingDestinataire" name="destinataireOption" value="existing" onchange="toggleDestinataireFields()" checked>
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <span class="radio-title">Select Existing</span>
+                                <span class="radio-desc">Choose from existing recipients</span>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" id="newDestinataire" name="destinataireOption" value="new" onchange="toggleDestinataireFields()">
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <span class="radio-title">Create New</span>
+                                <span class="radio-desc">Add a new Recipient</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="destinataire-fields">
+                    <div class="form-group" id="existingDestinataireField">
+                        <label for="destinataireId">
+                            <i class='bx bx-user-check'></i>
+                            Select Recipient
+                        </label>
+                        <select id="destinataireId" name="destinataireId">
+                            <option value="">Choose an existing Recipient</option>
+                            <option th:each="destinataire : ${destinataires}"
+                                    th:value="${destinataire.id}"
+                                    th:text="${destinataire.name}"></option>
+                        </select>
+                    </div>
+
+                    <div id="newDestinataireFields" class="new-destinataire-grid">
+                        <div class="form-group">
+                            <label for="newDestinataireName">
+                                <i class='bx bx-user-plus'></i>
+                                Recipient Name
+                            </label>
+                            <input type="text" id="newDestinataireName" th:field="*{newDestinataireName}" placeholder="Enter recipient name" />
+                        </div>
+                        <div class="form-group">
+                            <label for="newDestinataireEmail">
+                                <i class='bx bx-envelope'></i>
+                                Email (Optional)
+                            </label>
+                            <input type="email" id="newDestinataireEmail" name="newDestinataireEmail" placeholder="Enter email address" />
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="newDestinataireAddress">
+                                <i class='bx bx-map'></i>
+                                Address (Optional)
+                            </label>
+                            <input type="text" id="newDestinataireAddress" name="newDestinataireAddress" placeholder="Enter full address" />
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <button type="submit">Submit Withdrawal</button>
+
+            <!-- Products Selection Section -->
+            <div class="form-section">
+                <h3>
+                    <i class='bx bx-package'></i>
+                    Product Selection
+                </h3>
+                <div class="table-container">
+                    <table class="products-table" id="productTable">
+                        <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                            </th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Available</th>
+                            <th>Unit Price</th>
+                            <th>Withdraw Qty</th>
+                            <th>Total</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="product, iterStat : ${products}" th:class="${product.category?.id}" class="product-row">
+                            <td>
+                                <input type="checkbox" th:name="'productIds[' + ${iterStat.index} + ']'" th:value="${product.id}" class="product-checkbox" />
+                            </td>
+                            <td>
+                                <div class="product-info">
+                                    <span class="product-name" th:text="${product.productName}"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="category-badge" th:text="${product.category?.name} ?: 'N/A'"></span>
+                            </td>
+                            <td>
+                                <span class="quantity-badge" th:text="${product.quantity}"></span>
+                            </td>
+                            <td>
+                                <span class="price" th:text="'$' + ${product.price}"></span>
+                            </td>
+                            <td>
+                                <input type="number" th:name="'quantities[' + ${iterStat.index} + ']'" min="0" th:max="${product.quantity}" class="quantity-input" value="0" />
+                            </td>
+                            <td>
+                                <span class="product-total">$0.00</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Summary Section -->
+            <div class="form-section">
+                <div class="withdrawal-summary">
+                    <div class="summary-card">
+                        <div class="summary-icon">
+                            <i class='bx bx-calculator'></i>
+                        </div>
+                        <div class="summary-content">
+                            <h4>Total Withdrawal Value</h4>
+                            <p class="total-amount">$<span id="totalPrice">0.00</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Section -->
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" id="resetFormBtn">
+                    <i class='bx bx-reset'></i>
+                    Reset Form
+                </button>
+                <button type="submit" class="btn-primary">
+                    <i class='bx bx-check'></i>
+                    Process Withdrawal
+                </button>
             </div>
         </form>
-    </section>
+
+        <div class="modal reset-modal" id="resetModal" style="display: none;">
+            <div class="modal__content">
+                <div class="modal__header">
+                    <h2 class="modal__title">Reset Confirmation</h2>
+                    <button class="modal__close" onclick="closeModal()">×</button>
+                </div>
+                <div class="modal__body">
+
+                    <h4 class="reset-modal__title">Reset Form Data?</h4>
+
+                </div>
+                <div class="modal__footer">
+                    <button class="modal__button modal__cancel" onclick="closeModal()">
+                        Cancel
+                    </button>
+                    <button class="modal__button modal__confirm" onclick="confirmReset()">
+                        Reset Form
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 
 <!--========== FOOTER ==========-->
@@ -180,17 +275,33 @@
 <!--========== MAIN JS ==========-->
 <script src="/js/main.js"></script>
 <script>
+    function toggleDropdown() {
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.toggle('show');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('userDropdown');
+        const profileImg = document.querySelector('.header__img');
+        if (!dropdown.contains(event.target) && !profileImg.contains(event.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         const categoryFilter = document.getElementById('categoryFilter');
         const productTable = document.getElementById('productTable');
         const totalPriceSpan = document.getElementById('totalPrice');
+        const resetFormBtn = document.getElementById('resetFormBtn');
+        const resetModal = document.getElementById('resetModal');
         let totalPrice = 0;
 
         if (productTable) {
             window.toggleDestinataireFields = function() {
                 const existingOption = document.getElementById('existingDestinataire').checked;
                 document.getElementById('existingDestinataireField').style.display = existingOption ? 'block' : 'none';
-                document.getElementById('newDestinataireFields').style.display = existingOption ? 'none' : 'block';
+                document.getElementById('newDestinataireFields').style.display = existingOption ? 'none' : 'grid';
                 if (existingOption) {
                     document.getElementById('newDestinataireName').value = '';
                     document.getElementById('newDestinataireEmail').value = '';
@@ -200,20 +311,98 @@
                 }
             };
 
+            window.toggleSelectAll = function() {
+                const selectAllCheckbox = document.getElementById('selectAll');
+                const productCheckboxes = document.querySelectorAll('.product-checkbox');
+
+                productCheckboxes.forEach(checkbox => {
+                    if (checkbox.closest('tr').style.display !== 'none') {
+                        checkbox.checked = selectAllCheckbox.checked;
+                        const quantityInput = checkbox.closest('tr').querySelector('.quantity-input');
+                        if (!selectAllCheckbox.checked) {
+                            quantityInput.value = '0';
+                        }
+                        updateProductTotal(checkbox.closest('tr'));
+                    }
+                });
+            };
+
+            window.resetForm = function() {
+                openModal();
+            };
+
+            window.openModal = function() {
+                resetModal.style.display = 'flex';
+            };
+
+            window.closeModal = function() {
+                resetModal.style.display = 'none';
+            };
+
+            window.confirmReset = function() {
+                document.getElementById('withdrawalForm').reset();
+                document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = false);
+                document.querySelectorAll('.quantity-input').forEach(input => input.value = '0');
+                document.querySelectorAll('.product-total').forEach(total => total.textContent = '$0.00');
+                document.getElementById('selectAll').checked = false;
+                totalPriceSpan.textContent = '0.00';
+                toggleDestinataireFields();
+                closeModal();
+            };
+
+            resetFormBtn.addEventListener('click', resetForm);
+
+            // Close modal when clicking outside
+            window.addEventListener('click', (event) => {
+                if (event.target === resetModal) {
+                    closeModal();
+                }
+            });
+
             toggleDestinataireFields();
 
             categoryFilter.addEventListener('change', function() {
                 const selectedCategory = this.value;
                 const rows = productTable.querySelectorAll('tbody tr');
                 rows.forEach(row => {
-                    const rowCategory = row.className;
+                    const rowCategory = row.className.replace('product-row', '').trim();
                     if (!selectedCategory || rowCategory === selectedCategory) {
                         row.style.display = '';
                     } else {
                         row.style.display = 'none';
+                        // Uncheck hidden products
+                        const checkbox = row.querySelector('.product-checkbox');
+                        if (checkbox && checkbox.checked) {
+                            checkbox.checked = false;
+                            row.querySelector('.quantity-input').value = '0';
+                            updateProductTotal(row);
+                        }
                     }
                 });
+                // Update select all checkbox state
+                updateSelectAllState();
             });
+
+            function updateSelectAllState() {
+                const visibleCheckboxes = Array.from(document.querySelectorAll('.product-checkbox')).filter(cb =>
+                    cb.closest('tr').style.display !== 'none'
+                );
+                const checkedVisibleCheckboxes = visibleCheckboxes.filter(cb => cb.checked);
+                const selectAllCheckbox = document.getElementById('selectAll');
+
+                if (visibleCheckboxes.length === 0) {
+                    selectAllCheckbox.indeterminate = false;
+                    selectAllCheckbox.checked = false;
+                } else if (checkedVisibleCheckboxes.length === visibleCheckboxes.length) {
+                    selectAllCheckbox.indeterminate = false;
+                    selectAllCheckbox.checked = true;
+                } else if (checkedVisibleCheckboxes.length > 0) {
+                    selectAllCheckbox.indeterminate = true;
+                } else {
+                    selectAllCheckbox.indeterminate = false;
+                    selectAllCheckbox.checked = false;
+                }
+            }
 
             const checkboxes = productTable.querySelectorAll('.product-checkbox');
             if (checkboxes) {
@@ -224,11 +413,11 @@
                             console.error(`No quantity input found for product ${this.value}`);
                             return;
                         }
-                        console.log(`Checkbox ${this.value} checked: ${this.checked}`);
                         if (!this.checked) {
                             quantityInput.value = '0';
                             updateProductTotal(this.closest('tr'));
                         }
+                        updateSelectAllState();
                     });
                 });
             }
@@ -237,8 +426,16 @@
             if (quantityInputs) {
                 quantityInputs.forEach(input => {
                     input.addEventListener('input', function() {
-                        console.log(`Quantity input ${this.name} changed to: ${this.value}`);
                         updateProductTotal(this.closest('tr'));
+                        // Auto-check checkbox if quantity > 0
+                        const checkbox = this.closest('tr').querySelector('.product-checkbox');
+                        if (parseInt(this.value) > 0 && !checkbox.checked) {
+                            checkbox.checked = true;
+                            updateSelectAllState();
+                        } else if (parseInt(this.value) === 0 && checkbox.checked) {
+                            checkbox.checked = false;
+                            updateSelectAllState();
+                        }
                     });
                 });
             }
@@ -249,14 +446,16 @@
                     console.error(`No quantity input found in row`);
                     return;
                 }
-                const price = parseFloat(row.cells[4].textContent);
+                const priceText = row.cells[4].textContent.replace('$', '');
+                const price = parseFloat(priceText);
                 const quantity = parseInt(quantityInput.value) || 0;
                 const total = (price * quantity).toFixed(2);
-                row.querySelector('.product-total').textContent = total;
+                row.querySelector('.product-total').textContent = '$' + total;
 
                 totalPrice = 0;
                 productTable.querySelectorAll('.product-total').forEach(totalCell => {
-                    totalPrice += parseFloat(totalCell.textContent) || 0;
+                    const cellValue = totalCell.textContent.replace('$', '');
+                    totalPrice += parseFloat(cellValue) || 0;
                 });
                 totalPriceSpan.textContent = totalPrice.toFixed(2);
             }
@@ -267,74 +466,57 @@
                 const existingOption = document.getElementById('existingDestinataire').checked;
                 const destinataireId = document.getElementById('destinataireId').value;
                 const newDestinataireName = document.getElementById('newDestinataireName').value.trim();
-                console.log(`Validating form, checked checkboxes: ${checkboxes.length}`);
+
                 if (checkboxes.length === 0) {
                     alert('Please select at least one product.');
-                    console.log('Validation failed: No products selected');
                     return false;
                 }
+
                 if (existingOption && destinataireId === '') {
                     alert('Please select an existing Destinataire.');
-                    console.log('Validation failed: No existing Destinataire selected');
                     return false;
                 }
+
                 if (!existingOption && newDestinataireName === '') {
                     alert('Please enter a Destinataire name.');
-                    console.log('Validation failed: No new Destinataire name provided');
                     return false;
                 }
+
                 let hasValidQuantity = false;
                 form.querySelectorAll('.quantity-input').forEach(input => {
                     if (!input.closest('tr').querySelector('.product-checkbox:checked')) {
                         input.value = '0';
                     }
                 });
-                checkboxes.forEach((checkbox, index) => {
+
+                checkboxes.forEach((checkbox) => {
                     const quantityInput = checkbox.closest('tr').querySelector('.quantity-input');
                     if (!quantityInput) {
                         console.error(`No quantity input found for product ${checkbox.value}`);
                         return;
                     }
-                    console.log(`Checking quantity for product ${checkbox.value}: ${quantityInput.value}`);
                     const quantity = parseInt(quantityInput.value) || 0;
                     if (quantity > 0) {
                         hasValidQuantity = true;
                     }
                 });
+
                 if (!hasValidQuantity) {
                     alert('Please enter a valid quantity (greater than 0) for at least one selected product.');
-                    console.log('Validation failed: No valid quantities');
                     return false;
                 }
-                const formData = new FormData(form);
-                console.log('Form data:');
-                for (const [key, value] of formData.entries()) {
-                    console.log(`${key}: ${value}`);
-                }
-                console.log('Validation passed');
+
+                // Show loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Processing...';
+                submitBtn.disabled = true;
+
                 return true;
             };
         } else {
             console.warn('Product table not found');
         }
     });
-
-    document.getElementById('searchInput').addEventListener('input', function() {
-        const searchQuery = this.value.toLowerCase();
-        const productTable = document.getElementById('productTable');
-        if (productTable) {
-            const rows = productTable.querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                const productName = row.cells[1].textContent.toLowerCase();
-                if (productName.includes(searchQuery)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-    });
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c193312cbc32e3',t:'MTc0NjYyOTkwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c98a226c35b040',t:'MTc0NjcxMzQxNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
